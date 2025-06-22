@@ -47,59 +47,6 @@ except Exception as e:
     # o que inicie en un modo degradado. Para Render, esto probablemente causaría un fallo.
     modelo_forest = None # Establecer a None para evitar errores si la carga falla
 
-# Cargar los datos (DataFrame principal)
-file_id_df = "1PWTw-akWr59Gu7MoHra5WXMKwllxK9bp"
-url_df = f"https://drive.google.com/uc?export=download&id={file_id_df}"
-
-try:
-    df = pd.read_csv(url_df)
-    print("Datos descargados y cargados exitosamente.")
-
-    # --- Optimización y Preprocesamiento de Datos ---
-    # Estas funciones y columnas son necesarias globalmente si varias páginas las usan.
-    def clasificar_edad(edad):
-        if edad < 13: return "Niño"
-        elif edad < 19: return "Adolescente"
-        elif edad < 30: return "Joven"
-        elif edad < 61: return "Adulto"
-        elif edad < 200: return "Adulto mayor"
-    df['Rango de Edad'] = df['EDAD'].apply(clasificar_edad).astype('category') # Convertir a categoría
-
-    def clasificar_dias(dias):
-        if dias < 10: return "0-9"
-        elif dias < 20: return "10-19"
-        elif dias < 30: return "20-29"
-        elif dias < 40: return "30-39"
-        elif dias < 50: return "40-49"
-        elif dias < 60: return "50-59"
-        elif dias < 70: return "60-69"
-        elif dias < 80: return "70-79"
-        elif dias < 90: return "80-89"
-        else: return "90+"
-    df['RANGO_DIAS'] = df['DIFERENCIA_DIAS'].apply(clasificar_dias).astype('category') # Convertir a categoría
-
-    # Asegurar que las columnas sean categóricas para optimizar memoria y evitar warnings
-    df['DIA_SOLICITACITA'] = pd.to_datetime(df['DIA_SOLICITACITA'], errors='coerce')
-    df['MES'] = df['DIA_SOLICITACITA'].dt.to_period('M').astype(str).astype('category')
-    df['ATENDIDO'] = df['ATENDIDO'].astype('category')
-    df['PRESENCIAL_REMOTO'] = df['PRESENCIAL_REMOTO'].astype('category')
-    df['ESPECIALIDAD'] = df['ESPECIALIDAD'].astype('category')
-    df['SEGURO'] = df['SEGURO'].astype('category')
-    df['SEXO'] = df['SEXO'].astype('category')
-
-    # Calcular el uso de memoria del DataFrame
-    memoria_df_mb = df.memory_usage(deep=True).sum() / (1024 * 1024)
-    print(f"Memoria del DataFrame (después de optimización): {memoria_df_mb:.2f} MB")
-
-except requests.exceptions.RequestException as e:
-    print(f"Error al descargar los datos: {e}")
-    print("Asegúrate de que el ID del archivo de datos sea correcto y que el archivo sea accesible públicamente.")
-    df = pd.DataFrame() # Crear un DataFrame vacío para que la app no falle al iniciar
-except Exception as e:
-    print(f"Error inesperado al cargar o procesar los datos: {e}")
-    df = pd.DataFrame() # Crear un DataFrame vacío
-
-
 # --- Flask Server y Configuración de la Aplicación Dash Principal ---
 server = Flask(__name__)
 
@@ -172,11 +119,6 @@ def index():
             <h2>Bienvenido al Dashboard de Gestión Hospitalaria</h2>
             <p>Selecciona una opción para acceder a los dashboards o al simulador de tiempos de espera.</p>
             <div class="links">
-                <a href="/dash/edad/">Análisis por Edad</a>
-                <a href="/dash/espera/">Tiempos de Espera</a>
-                <a href="/dash/modalidad/">Modalidad de Atención</a>
-                <a href="/dash/asegurados/">Análisis por Seguro</a>
-                <a href="/dash/tiempo/">Análisis de Tiempos</a>
                 <a href="/dash/simulador/">Simulador de Tiempos</a>
             </div>
         </div>
