@@ -1,17 +1,21 @@
-import dash # <-- Asegúrate de importar dash aquí
+import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
-import pandas as pd # <-- No parece usarse directamente en simulador.py, pero puede quedarse
+import pandas as pd # Aunque no se usa directamente en este código, se puede mantener
 from dash import register_page
-from datetime import datetime # <-- Necesario si usas datetime.now() aquí
-import numpy as np # <-- No parece usarse directamente, pero puede quedarse
+from datetime import datetime # ¡Esta importación es clave para dia_actual y semana_anio!
+import numpy as np # Aunque no se usa directamente en este código, se puede mantener
 
-# Importar solo las variables globales necesarias de multi_app
-# Eliminamos 'hoy' porque no está definido en multi_app.py y no se usa en este código.
-from multi_app import modelo_forest, dia_actual, semana_anio
+# Importar SOLO modelo_forest de multi_app.
+# Las otras variables (dia_actual, semana_anio) las definiremos aquí.
+from multi_app import modelo_forest
 
-# Definir el diccionario de especialidades localmente o importarlo si está en multi_app
-# Ya lo tienes definido localmente, así que está bien aquí.
+# --- Definir dia_actual y semana_anio localmente para esta página ---
+# Esto rompe la dependencia circular
+dia_actual = datetime.now().day
+semana_anio = datetime.now().isocalendar()[1]
+
+# Define especialidades mapping (could also be imported if it's large)
 especialidades_dict = {
     17: 'GERIATRIA', 16: 'GASTROENTEROLOGIA', 13: 'ENDOCRINOLOGIA', 51: 'PSIQUIATRIA',
     2: 'CARDIOLOGIA', 61: 'UROLOGIA', 50: 'PSICOLOGIA', 6: 'CIRUGIA GENERAL',
@@ -60,10 +64,10 @@ layout = html.Div([
     dcc.Input(id='input-edad', type='number', value=30),
 
     html.Label("Día:"),
-    dcc.Input(id='input-dia', type='number', value=dia_actual), # Usa dia_actual de multi_app
+    dcc.Input(id='input-dia', type='number', value=dia_actual),
 
     html.Label("Semana del año:"),
-    dcc.Input(id='input-semana_anio', type='number', value=semana_anio), # Usa semana_anio de multi_app
+    dcc.Input(id='input-semana_anio', type='number', value=semana_anio),
 
     html.Br(),
     html.Button("Predecir", id='btn-predecir', n_clicks=0),
@@ -85,7 +89,6 @@ def predecir(n_clicks, especialidad, edad, dia, semana_anio):
         if especialidad is None or dia is None or semana_anio is None:
             return "Por favor, completa todos los campos."
 
-        # Asegúrate de que los valores de entrada sean números enteros
         try:
             especialidad = int(especialidad)
             edad = int(edad)
@@ -98,7 +101,6 @@ def predecir(n_clicks, especialidad, edad, dia, semana_anio):
             especialidad, edad, dia, semana_anio
         ]]
         
-        # Asegurarse de que el modelo se haya cargado correctamente antes de usarlo
         if modelo_forest is None:
             return "Error: El modelo no pudo ser cargado. Por favor, contacta al soporte."
 
@@ -109,4 +111,4 @@ def predecir(n_clicks, especialidad, edad, dia, semana_anio):
             html.P(f"Tiempo estimado de espera: {prediccion:.2f} días")
         ])
 
-    return "" # Esto asegura que no hay salida si no se ha hecho click
+    return ""
