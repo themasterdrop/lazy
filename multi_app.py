@@ -203,8 +203,6 @@ app.layout = html.Div([
 
 # Variables globales adicionales que tus páginas de Dash podrían necesitar
 # Por ejemplo, si tienes diccionarios de especialidades o fechas actuales
-dia_actual = datetime.now().day
-semana_anio = datetime.now().isocalendar()[1]
 especialidades_dict = {
     'Cardiología': 1, 'Pediatría': 2, 'Dermatología': 3, 'Oftalmología': 4,
     'Ginecología': 5, 'Traumatología': 6, 'Neurología': 7, 'Otorrinolaringología': 8,
