@@ -3,20 +3,24 @@ from flask import Flask, render_template_string, send_from_directory
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
-import plotly.express as px
-import joblib  # Para cargar el modelo guardado con joblib
+import plotly.express as px # Aunque no se usa directamente en este simulador, si lo usas en otras apps Dash, mantenlo
+import joblib # Para cargar el modelo guardado con joblib
 import requests # Para descargar el modelo desde la URL
 import io # Para manejar el contenido binario del modelo en memoria
 from datetime import datetime # Para obtener la fecha actual (día y semana_del_año)
 import os # Para trabajar con rutas de archivos, especialmente para la carpeta 'static'
 
-print("--- Iniciando carga y preprocesamiento de datos y modelo (multi_app.py) ---")
+print("--- Iniciando la aplicación Dash/Flask (app.py) ---")
 
 # URLs de los recursos
+# Usar una variable de entorno para la URL del modelo es una buena práctica
+# para facilitar cambios sin modificar el código.
+# MODEL_URL = os.environ.get("HF_MODEL_URL", "https://huggingface.co/themasterdrop/simulador_citas_modelo/resolve/main/modelo_forest.pkl?download=true")
+# Por ahora, la dejamos fija como la tienes para mayor simplicidad si no usas env vars
 HF_MODEL_URL = "https://huggingface.co/themasterdrop/simulador_citas_modelo/resolve/main/modelo_forest.pkl?download=true"
 
+
 # Diccionario de especialidades (tal cual lo proporcionaste)
-# Las claves son los códigos numéricos, los valores son los nombres de las especialidades.
 especialidades_dic = {
     17: 'GERIATRIA', 16: 'GASTROENTEROLOGIA', 13: 'ENDOCRINOLOGIA',
     51: 'PSIQUIATRIA', 2: 'CARDIOLOGIA', 61: 'UROLOGIA', 50: 'PSICOLOGIA',
@@ -47,7 +51,7 @@ especialidades_dic = {
 }
 
 # --- Carga del Modelo de Machine Learning (joblib) ---
-print("--- Iniciando descarga y carga del modelo (multi_app.py) ---")
+print("--- Iniciando descarga y carga del modelo desde Hugging Face (app.py) ---")
 modelo_forest = None # Inicializar a None en caso de error
 
 try:
@@ -56,10 +60,11 @@ try:
 
     model_bytes = io.BytesIO(response.content)
     modelo_forest = joblib.load(model_bytes) # Carga el modelo con joblib
-    print("¡Modelo cargado con éxito usando joblib!")
+    print("¡Modelo cargado con éxito desde Hugging Face URL!")
 
 except requests.exceptions.RequestException as e:
     print(f"ERROR al descargar el modelo desde Hugging Face: {e}")
+    print("Por favor, verifica la URL del modelo o tu conexión a internet.")
 except Exception as e:
     print(f"ERROR inesperado al cargar el modelo con joblib: {e}")
     print("Asegúrate de que el archivo .pkl fue guardado correctamente con joblib y es compatible.")
@@ -68,12 +73,13 @@ print("-" * 40)
 
 
 # --- Configuración del Servidor Flask Compartido ---
+# Este es el servidor Flask principal que Gunicorn iniciará.
 server = Flask(__name__)
 
 # Ruta para servir archivos estáticos (como el logo.png)
 @server.route('/static/<path:filename>')
 def static_files(filename):
-    # Asume que 'static' está en la misma raíz que 'multi_app.py'
+    # Asume que 'static' está en la misma raíz que 'app.py'
     return send_from_directory(os.path.join(server.root_path, 'static'), filename)
 
 # Ruta raíz con enlaces a todas las aplicaciones Dash
@@ -146,29 +152,32 @@ def index():
     </body>
     </html>
     """)
-# --- App 6: Simulador de Tiempo de Espera (NUEVA APP) ---
+
+# --- App: Simulador de Tiempo de Espera ---
+# Aquí es donde inicializas tu aplicación Dash y la asocias al servidor Flask.
 simulador_app = dash.Dash(__name__, server=server, url_base_pathname='/simulador/')
+
 simulador_app.layout = html.Div([
     html.H1("Simulador de Tiempo de Espera Estimado", style={'color': '#2c3e50', 'marginBottom': '30px'}),
     html.Div([
         html.Label("Edad:", style={'display': 'block', 'marginBottom': '5px', 'fontWeight': 'bold'}),
         dcc.Input(id='sim-input-edad', type='number', value=30, min=0, max=120, className="input-field", style={'width': 'calc(100% - 20px)', 'padding': '10px', 'borderRadius': '5px', 'border': '1px solid #ddd', 'marginBottom': '15px'}),
-        
+
         html.Label("Especialidad:", style={'display': 'block', 'marginBottom': '5px', 'fontWeight': 'bold'}),
         dcc.Dropdown(
             id='sim-input-especialidad',
-            options=[{'label': v, 'value': k} for k, v in especialidades_dic.items()], # Aquí se usa especialidades_dic
+            options=[{'label': v, 'value': k} for k, v in especialidades_dic.items()],
             value=17, # Valor por defecto (GERIATRIA) o el que prefieras
             placeholder="Selecciona una especialidad",
             className="dropdown-field",
             style={'marginBottom': '20px'}
         ),
-        
+
         html.Button('Predecir Tiempo de Espera', id='sim-predict-button', n_clicks=0, className="button-predict",
-                    style={'backgroundColor': '#28a745', 'color': 'white', 'padding': '12px 25px', 'border': 'none', 'borderRadius': '5px', 'cursor': 'pointer', 'fontSize': '16px', 'transition': 'background-color 0.3s ease', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'}),
+                     style={'backgroundColor': '#28a745', 'color': 'white', 'padding': '12px 25px', 'border': 'none', 'borderRadius': '5px', 'cursor': 'pointer', 'fontSize': '16px', 'transition': 'background-color 0.3s ease', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'}),
         html.Div(id='sim-output-prediction', style={'marginTop': '30px', 'fontSize': '22px', 'fontWeight': 'bold', 'color': '#007bff'})
     ], style={'padding': '30px', 'border': '1px solid #e0e0e0', 'borderRadius': '10px', 'maxWidth': '550px', 'margin': '40px auto', 'backgroundColor': '#ffffff', 'boxShadow': '0 5px 15px rgba(0,0,0,0.08)'}),
-    
+
     html.Br(),
     html.Div(dcc.Link('Volver a la Página Principal', href='/', style={'display': 'inline-block', 'marginTop': '30px', 'padding': '12px 25px', 'backgroundColor': '#f39c12', 'color': 'white', 'textDecoration': 'none', 'borderRadius': '5px', 'fontSize': '16px', 'transition': 'background-color 0.3s ease'}))
 ], style={'textAlign': 'center', 'fontFamily': 'Arial, sans-serif', 'backgroundColor': '#f4f6f8', 'padding': '40px 20px', 'minHeight': '100vh', 'boxSizing': 'border-box'})
@@ -213,6 +222,7 @@ def predecir(n_clicks, edad, especialidad_cod_input): # Renombrado a especialida
 
     try:
         predicted_days = modelo_forest.predict(input_data)[0]
+        # Asegurarse de que el tiempo de espera no sea negativo
         predicted_days_rounded = max(0, round(predicted_days))
 
         # Recuperar el nombre de la especialidad para mostrarlo en el resultado
@@ -225,10 +235,10 @@ def predecir(n_clicks, edad, especialidad_cod_input): # Renombrado a especialida
 
 # --- Punto de Entrada para Gunicorn y Desarrollo Local ---
 # 'application' es el nombre que Gunicorn buscará para iniciar tu app en Render.
-application = server
+application = server # Esta línea es PERFECTA. Gunicorn buscará 'application' dentro de tu módulo 'app.py'
 
 if __name__ == '__main__':
-    # Este bloque solo se ejecuta cuando corres el script localmente (python multi_app.py)
+    # Este bloque solo se ejecuta cuando corres el script localmente (python app.py)
     # No se ejecuta en el entorno de Render cuando Gunicorn lo inicia.
     port = int(os.environ.get("PORT", 8050)) # Render asigna un puerto, localmente usa 8050
     server.run(host='0.0.0.0', port=port, debug=True)
