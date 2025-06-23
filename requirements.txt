@@ -5,4 +5,4 @@ plotly
 joblib
 requests
 gunicorn
-scikit-learn
+scikit-learn==1.6.1
