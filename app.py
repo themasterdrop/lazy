@@ -189,80 +189,39 @@ def index():
 simulador_app = dash.Dash(__name__, server=server, url_base_pathname='/simulador/')
 
 simulador_app.layout = html.Div([
-    html.H1("Simulador de Tiempo de Espera Estimado", style={'color': '#2c3e50', 'marginBottom': '30px', 'fontWeight': '700'}),
-    html.Div([
-        html.Label("Edad:", style={'display': 'block', 'marginBottom': '8px', 'fontWeight': 'bold', 'color': '#444'}),
-        dcc.Input(id='sim-input-edad', type='number', value=30, min=0, max=120, className="input-field",
-                  style={'width': 'calc(100% - 20px)', 'padding': '12px', 'borderRadius': '8px', 'border': '1px solid #cce7ff', 'marginBottom': '20px', 'fontSize': '16px', 'boxShadow': 'inset 0 1px 3px rgba(0,0,0,0.08)'}),
-
-        html.Label("Especialidad:", style={'display': 'block', 'marginBottom': '8px', 'fontWeight': 'bold', 'color': '#444'}),
-        dcc.Dropdown(
-            id='sim-input-especialidad',
-            options=[{'label': v, 'value': k} for k, v in especialidades_dic.items()],
-            value=17, # Valor por defecto (GERIATRIA) o el que prefieras
-            placeholder="Selecciona una especialidad",
-            className="dropdown-field",
-            style={'marginBottom': '30px', 'borderRadius': '8px', 'border': '1px solid #cce7ff', 'boxShadow': 'inset 0 1px 3px rgba(0,0,0,0.08)'}
-        ),
-
-        html.Button('Predecir Tiempo de Espera', id='sim-predict-button', n_clicks=0, className="button-predict",
-                     style={
-                         'backgroundColor': '#28a745', 'color': 'white', 'padding': '15px 35px', 'border': 'none',
-                         'borderRadius': '8px', 'cursor': 'pointer', 'fontSize': '18px', 'fontWeight': '600',
-                         'transition': 'all 0.3s ease', 'boxShadow': '0 5px 15px rgba(40,167,69,0.2)',
-                         'outline': 'none', 'borderBottom': '3px solid #1e7e34' # Efecto 3D
-                     }),
-        html.Style('''
-            .button-predict:hover {
-                background-color: #218838;
-                transform: translateY(-2px);
-                box-shadow: 0 7px 20px rgba(40,167,69,0.3);
-                border-bottom: 3px solid #1c7430;
-            }
-            .button-predict:active {
-                transform: translateY(1px);
-                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                border-bottom: none;
-            }
-            /* Estilos para el dropdown de Dash */
-            .Select-control, .Select-menu-outer {
-                border-radius: 8px !important;
-                border-color: #cce7ff !important;
-                box-shadow: inset 0 1px 3px rgba(0,0,0,0.08) !important;
-            }
-            .Select-control {
-                height: 45px !important;
-                font-size: 16px !important;
-            }
-            .Select-placeholder, .Select--single > .Select-control .Select-value {
-                line-height: 45px !important;
-            }
-            .Select-option.is-focused {
-                background-color: #e0f2f7 !important;
-            }
-            .Select-option.is-selected {
-                background-color: #d1ecf1 !important;
-                color: #0c5460 !important;
-            }
-        '''),
-        
-        # Div para mostrar la predicción
-        html.Div(id='sim-output-prediction', style={'marginTop': '40px', 'fontSize': '26px', 'fontWeight': 'bold', 'color': '#0056b3', 'textShadow': '1px 1px 2px rgba(0,0,0,0.05)'}),
-        
-        # Div para mostrar la advertencia
-        html.Div(id='sim-output-warning', style={'marginTop': '20px', 'fontSize': '20px', 'color': '#dc3545', 'fontWeight': 'bold', 'padding': '10px', 'backgroundColor': '#f8d7da', 'border': '1px solid #f5c6cb', 'borderRadius': '8px', 'display': 'none'})
-
-    ], style={'padding': '40px', 'border': '1px solid #d1ecf1', 'borderRadius': '15px', 'maxWidth': '600px', 'margin': '50px auto', 'backgroundColor': '#ffffff', 'boxShadow': '0 10px 30px rgba(0,0,0,0.1)'}),
-
-    html.Br(),
-    html.Div(dcc.Link('Volver a la Página Principal', href='/', style={
-        'display': 'inline-block', 'marginTop': '40px', 'padding': '15px 30px',
-        'background': 'linear-gradient(135deg, #f39c12 0%, #e67e22 100%)',
-        'color': 'white', 'textDecoration': 'none', 'borderRadius': '8px',
-        'fontSize': '18px', 'fontWeight': '600', 'transition': 'all 0.3s ease',
-        'boxShadow': '0 5px 15px rgba(243,156,18,0.2)', 'outline': 'none', 'borderBottom': '3px solid #c07712'
-    }), className="back-button"),
+    # Bloque de estilos generales para el simulador
     html.Style('''
+        .button-predict:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(40,167,69,0.3);
+            border-bottom: 3px solid #1c7430;
+        }
+        .button-predict:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-bottom: none;
+        }
+        /* Estilos para el dropdown de Dash */
+        .Select-control, .Select-menu-outer {
+            border-radius: 8px !important;
+            border-color: #cce7ff !important;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08) !important;
+        }
+        .Select-control {
+            height: 45px !important;
+            font-size: 16px !important;
+        }
+        .Select-placeholder, .Select--single > .Select-control .Select-value {
+            line-height: 45px !important;
+        }
+        .Select-option.is-focused {
+            background-color: #e0f2f7 !important;
+        }
+        .Select-option.is-selected {
+            background-color: #d1ecf1 !important;
+            color: #0c5460 !important;
+        }
         .back-button a:hover {
             background: linear-gradient(135deg, #e67e22 0%, #f39c12 100%);
             transform: translateY(-2px);
@@ -308,8 +267,48 @@ simulador_app.layout = html.Div([
             .dash-app-container #sim-output-prediction { font-size: 18px; }
             .dash-app-container #sim-output-warning { font-size: 14px; }
         }
-    ''')
-], className="dash-app-container", style={'textAlign': 'center', 'fontFamily': 'Inter, sans-serif', 'backgroundColor': '#eef2f6', 'padding': '40px 20px', 'minHeight': '100vh', 'boxSizing': 'border-box'})
+    '''),
+    html.H1("Simulador de Tiempo de Espera Estimado", style={'color': '#2c3e50', 'marginBottom': '30px', 'fontWeight': '700'}),
+    html.Div([
+        html.Label("Edad:", style={'display': 'block', 'marginBottom': '8px', 'fontWeight': 'bold', 'color': '#444'}),
+        dcc.Input(id='sim-input-edad', type='number', value=30, min=0, max=120, className="input-field",
+                  style={'width': 'calc(100% - 20px)', 'padding': '12px', 'borderRadius': '8px', 'border': '1px solid #cce7ff', 'marginBottom': '20px', 'fontSize': '16px', 'boxShadow': 'inset 0 1px 3px rgba(0,0,0,0.08)'}),
+
+        html.Label("Especialidad:", style={'display': 'block', 'marginBottom': '8px', 'fontWeight': 'bold', 'color': '#444'}),
+        dcc.Dropdown(
+            id='sim-input-especialidad',
+            options=[{'label': v, 'value': k} for k, v in especialidades_dic.items()],
+            value=17, # Valor por defecto (GERIATRIA) o el que prefieras
+            placeholder="Selecciona una especialidad",
+            className="dropdown-field",
+            style={'marginBottom': '30px', 'borderRadius': '8px', 'border': '1px solid #cce7ff', 'boxShadow': 'inset 0 1px 3px rgba(0,0,0,0.08)'}
+        ),
+
+        html.Button('Predecir Tiempo de Espera', id='sim-predict-button', n_clicks=0, className="button-predict",
+                     style={
+                         'backgroundColor': '#28a745', 'color': 'white', 'padding': '15px 35px', 'border': 'none',
+                         'borderRadius': '8px', 'cursor': 'pointer', 'fontSize': '18px', 'fontWeight': '600',
+                         'transition': 'all 0.3s ease', 'boxShadow': '0 5px 15px rgba(40,167,69,0.2)',
+                         'outline': 'none', 'borderBottom': '3px solid #1e7e34' # Efecto 3D
+                     }),
+        
+        # Div para mostrar la predicción
+        html.Div(id='sim-output-prediction', style={'marginTop': '40px', 'fontSize': '26px', 'fontWeight': 'bold', 'color': '#0056b3', 'textShadow': '1px 1px 2px rgba(0,0,0,0.05)'}),
+        
+        # Div para mostrar la advertencia
+        html.Div(id='sim-output-warning', style={'marginTop': '20px', 'fontSize': '20px', 'color': '#dc3545', 'fontWeight': 'bold', 'padding': '10px', 'backgroundColor': '#f8d7da', 'border': '1px solid #f5c6cb', 'borderRadius': '8px', 'display': 'none'})
+
+    ], style={'padding': '40px', 'border': '1px solid #d1ecf1', 'borderRadius': '15px', 'maxWidth': '600px', 'margin': '50px auto', 'backgroundColor': '#ffffff', 'boxShadow': '0 10px 30px rgba(0,0,0,0.1)'}),
+
+    html.Br(),
+    html.Div(dcc.Link('Volver a la Página Principal', href='/', style={
+        'display': 'inline-block', 'marginTop': '40px', 'padding': '15px 30px',
+        'background': 'linear-gradient(135deg, #f39c12 0%, #e67e22 100%)',
+        'color': 'white', 'textDecoration': 'none', 'borderRadius': '8px',
+        'fontSize': '18px', 'fontWeight': '600', 'transition': 'all 0.3s ease',
+        'boxShadow': '0 5px 15px rgba(243,156,18,0.2)', 'outline': 'none', 'borderBottom': '3px solid #c07712'
+    }), className="back-button"),
+], className="dash-app-container", style={'textAlign': 'center', 'fontFamily': 'Inter', 'backgroundColor': '#eef2f6', 'padding': '40px 20px', 'minHeight': '100vh', 'boxSizing': 'border-box'})
 
 
 @simulador_app.callback(
