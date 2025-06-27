@@ -3,24 +3,20 @@ from flask import Flask, render_template_string, send_from_directory
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
-import plotly.express as px # Aunque no se usa directamente en este simulador, si lo usas en otras apps Dash, mantenlo
-import joblib # Para cargar el modelo guardado con joblib
-import requests # Para descargar el modelo desde la URL
-import io # Para manejar el contenido binario del modelo en memoria
-from datetime import datetime # Para obtener la fecha actual (día y semana_del_año)
-import os # Para trabajar con rutas de archivos, especialmente para la carpeta 'static'
+import plotly.express as px
+import joblib
+import requests
+import io
+from datetime import datetime
+import os
 
 print("--- Iniciando la aplicación Dash/Flask (app.py) ---")
 
 # URLs de los recursos
-# Usar una variable de entorno para la URL del modelo es una buena práctica
-# para facilitar cambios sin modificar el código.
-# MODEL_URL = os.environ.get("HF_MODEL_URL", "https://huggingface.co/themasterdrop/simulador_citas_modelo/resolve/main/modelo_forest.pkl?download=true")
-# Por ahora, la dejamos fija como la tienes para mayor simplicidad si no usas env vars
 HF_MODEL_URL = "https://huggingface.co/themasterdrop/simulador_citas_modelo/resolve/main/modelo_forest.pkl?download=true"
 
 
-# Diccionario de especialidades (tal cual lo proporcionaste)
+# Diccionario
 especialidades_dic = {
     17: 'GERIATRIA', 16: 'GASTROENTEROLOGIA', 13: 'ENDOCRINOLOGIA',
     51: 'PSIQUIATRIA', 2: 'CARDIOLOGIA', 61: 'UROLOGIA', 50: 'PSICOLOGIA',
@@ -50,9 +46,9 @@ especialidades_dic = {
     60: 'URODINAMIA', 15: 'ENDOCRINOLOGIA TUBERCULOSIS'
 }
 
-# --- Carga del Modelo de Machine Learning (joblib) ---
+# --- Carga del Modelo de Machine Learning  ---
 print("--- Iniciando descarga y carga del modelo desde Hugging Face (app.py) ---")
-modelo_forest = None # Inicializar a None en caso de error
+modelo_forest = None 
 
 try:
     response = requests.get(HF_MODEL_URL)
@@ -73,13 +69,13 @@ print("-" * 40)
 
 
 # --- Configuración del Servidor Flask Compartido ---
-# Este es el servidor Flask principal que Gunicorn iniciará.
+
 server = Flask(__name__)
 
-# Ruta para servir archivos estáticos (como el logo.png)
+# Ruta para servir archivos estáticos
 @server.route('/static/<path:filename>')
 def static_files(filename):
-    # Asume que 'static' está en la misma raíz que 'app.py'
+    
     return send_from_directory(os.path.join(server.root_path, 'static'), filename)
 
 # Ruta raíz con enlaces a todas las aplicaciones Dash
@@ -154,7 +150,7 @@ def index():
     """)
 
 # --- App: Simulador de Tiempo de Espera ---
-# Aquí es donde inicializas tu aplicación Dash y la asocias al servidor Flask.
+
 simulador_app = dash.Dash(__name__, server=server, url_base_pathname='/simulador/')
 
 simulador_app.layout = html.Div([
@@ -167,7 +163,7 @@ simulador_app.layout = html.Div([
         dcc.Dropdown(
             id='sim-input-especialidad',
             options=[{'label': v, 'value': k} for k, v in especialidades_dic.items()],
-            value=17, # Valor por defecto (GERIATRIA) o el que prefieras
+            value=17,
             placeholder="Selecciona una especialidad",
             className="dropdown-field",
             style={'marginBottom': '20px'}
@@ -187,10 +183,10 @@ simulador_app.layout = html.Div([
     Output('sim-output-prediction', 'children'),
     Input('sim-predict-button', 'n_clicks'),
     Input('sim-input-edad', 'value'),
-    Input('sim-input-especialidad', 'value'), # Este es el código numérico
+    Input('sim-input-especialidad', 'value'),
     prevent_initial_call=True
 )
-def predecir(n_clicks, edad, especialidad_cod_input): # Renombrado a especialidad_cod_input
+def predecir(n_clicks, edad, especialidad_cod_input):
     if n_clicks is None or n_clicks == 0:
         return ""
 
@@ -205,10 +201,8 @@ def predecir(n_clicks, edad, especialidad_cod_input): # Renombrado a especialida
     semana_del_año = today.isocalendar()[1]
 
     # Crear el DataFrame de entrada para el modelo
-    # Las columnas y su orden DEBEN coincidir con el entrenamiento del modelo:
-    # ['ESPECIALIDAD_cod', 'EDAD', 'día', 'semana_del_año']
     input_data = pd.DataFrame([[
-        especialidad_cod_input, # Usamos el código numérico directamente
+        especialidad_cod_input,
         edad,
         dia,
         semana_del_año
@@ -234,11 +228,9 @@ def predecir(n_clicks, edad, especialidad_cod_input): # Renombrado a especialida
 
 
 # --- Punto de Entrada para Gunicorn y Desarrollo Local ---
-# 'application' es el nombre que Gunicorn buscará para iniciar tu app en Render.
-application = server # Esta línea es PERFECTA. Gunicorn buscará 'application' dentro de tu módulo 'app.py'
+application = server
 
 if __name__ == '__main__':
-    # Este bloque solo se ejecuta cuando corres el script localmente (python app.py)
-    # No se ejecuta en el entorno de Render cuando Gunicorn lo inicia.
-    port = int(os.environ.get("PORT", 8050)) # Render asigna un puerto, localmente usa 8050
+   
+    port = int(os.environ.get("PORT", 8050))
     server.run(host='0.0.0.0', port=port, debug=True)
