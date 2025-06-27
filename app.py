@@ -87,8 +87,8 @@ def index():
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
         <style>
             body {
-                font-family: 'Inter', sans-serif; /* Usando Inter */
-                background-color: #eef2f6; /* Fondo más suave */
+                font-family: 'Inter', sans-serif;
+                background-color: #eef2f6;
                 text-align: center;
                 padding: 50px 20px;
                 color: #333;
@@ -96,7 +96,7 @@ def index():
             }
             h2 {
                 color: #2c3e50;
-                font-weight: 700; /* Más audaz */
+                font-weight: 700;
                 margin-bottom: 25px;
             }
             p {
@@ -105,47 +105,47 @@ def index():
                 margin-bottom: 30px;
             }
             .logo {
-                width: 100px; /* Logo un poco más grande */
+                width: 100px;
                 height: auto;
                 margin-bottom: 25px;
-                border-radius: 15px; /* Bordes redondeados */
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+                border-radius: 15px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             }
             .container {
                 background-color: #ffffff;
-                padding: 50px 30px; /* Mayor padding */
-                border-radius: 15px; /* Bordes más redondeados */
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+                padding: 50px 30px;
+                border-radius: 15px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
                 display: inline-block;
-                max-width: 650px; /* Ancho ligeramente mayor */
+                max-width: 650px;
                 width: 100%;
-                animation: fadeIn 0.8s ease-out; /* Animación más suave */
+                animation: fadeIn 0.8s ease-out;
                 box-sizing: border-box;
             }
             .links {
                 margin-top: 30px;
-                display: flex; /* Usar flexbox para alinear botones */
-                flex-wrap: wrap; /* Permitir que los botones se envuelvan */
-                justify-content: center; /* Centrar botones */
-                gap: 15px; /* Espacio entre botones */
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
             }
             a {
-                flex-grow: 1; /* Permite que los enlaces crezcan */
-                max-width: 280px; /* Controla el ancho máximo de los enlaces */
-                margin: 0; /* Eliminar margen para usar gap */
-                padding: 15px 30px; /* Mayor padding */
-                background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); /* Degradado */
+                flex-grow: 1;
+                max-width: 280px;
+                margin: 0;
+                padding: 15px 30px;
+                background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
                 color: white;
                 text-decoration: none;
-                border-radius: 8px; /* Bordes redondeados */
-                font-weight: 600; /* Texto más audaz */
+                border-radius: 8px;
+                font-weight: 600;
                 font-size: 1.05em;
-                transition: all 0.3s ease; /* Transición para todas las propiedades */
+                transition: all 0.3s ease;
                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             }
             a:hover {
-                background: linear-gradient(135deg, #2980b9 0%, #3498db 100%); /* Degradado inverso al hover */
-                transform: translateY(-3px) scale(1.02); /* Efecto 3D sutil */
+                background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+                transform: translateY(-3px) scale(1.02);
                 box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
             }
             @keyframes fadeIn {
@@ -178,7 +178,7 @@ def index():
             <p>Accede a herramientas y visualizaciones para una mejor gestión y predicción de citas.</p>
             <div class="links">
                 <a href="/simulador/">Simulador de Tiempo de Espera</a>
-                <!-- Puedes añadir más enlaces aquí si extiendes el proyecto -->
+                
             </div>
         </div>
     </body>
