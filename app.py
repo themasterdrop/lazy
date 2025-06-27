@@ -210,7 +210,7 @@ simulador_app.layout = html.Div([
                          'backgroundColor': '#28a745', 'color': 'white', 'padding': '15px 35px', 'border': 'none',
                          'borderRadius': '8px', 'cursor': 'pointer', 'fontSize': '18px', 'fontWeight': '600',
                          'transition': 'all 0.3s ease', 'boxShadow': '0 5px 15px rgba(40,167,69,0.2)',
-                         'outline': 'none', 'borderBottom': '3px solid #1e7e34' /* Efecto 3D */
+                         'outline': 'none', 'borderBottom': '3px solid #1e7e34' # Efecto 3D
                      }),
         html.Style('''
             .button-predict:hover {
@@ -315,7 +315,7 @@ simulador_app.layout = html.Div([
 @simulador_app.callback(
     [Output('sim-output-prediction', 'children'),
      Output('sim-output-warning', 'children'),
-     Output('sim-output-warning', 'style')], # Añadido output para el estilo de la advertencia (display)
+     Output('sim-output-warning', 'style')],
     Input('sim-predict-button', 'n_clicks'),
     State('sim-input-edad', 'value'),
     State('sim-input-especialidad', 'value'),
@@ -323,7 +323,7 @@ simulador_app.layout = html.Div([
 )
 def predecir(n_clicks, edad, especialidad_cod_input):
     if n_clicks is None or n_clicks == 0:
-        return "", "", {'display': 'none'} # Oculta la advertencia al inicio
+        return "", "", {'display': 'none'}
 
     if modelo_forest is None:
         return "❌ Error: El modelo de predicción no se pudo cargar. Contacta al administrador.", "", {'display': 'none'}
@@ -356,11 +356,11 @@ def predecir(n_clicks, edad, especialidad_cod_input):
         prediction_text = f"Especialidad: {nombre_especialidad} — Tiempo estimado de espera: ➡️ **{predicted_days_rounded} días**."
         
         warning_text = "⚠️ La espera procede a ser de un mes o más, se recomienda tomar precauciones."
-        warning_style = {'marginTop': '20px', 'fontSize': '20px', 'color': '#dc3545', 'fontWeight': 'bold', 'padding': '10px', 'backgroundColor': '#f8d7da', 'border': '1px solid #f5c6cb', 'borderRadius': '8px', 'display': 'block'} # Mostrar la advertencia
+        warning_style = {'marginTop': '20px', 'fontSize': '20px', 'color': '#dc3545', 'fontWeight': 'bold', 'padding': '10px', 'backgroundColor': '#f8d7da', 'border': '1px solid #f5c6cb', 'borderRadius': '8px', 'display': 'block'}
         
         if predicted_days_rounded < 30:
             warning_text = ""
-            warning_style['display'] = 'none' # Ocultar la advertencia si no se cumple la condición
+            warning_style['display'] = 'none'
         
         return prediction_text, warning_text, warning_style
 
